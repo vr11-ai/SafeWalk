@@ -1,0 +1,28 @@
+# Environment & Secrets
+.env
+.env.*
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+env/
+venv/
+.venv/
+
+# Hackathon temporary files & documents
+*.docx
+docx_temp/
+
+# Databases & Cache
+chroma_db/
+.chroma/
+*.log
+
+# IDE & System
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
