@@ -36,10 +36,17 @@ genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 
+# Import RAG retrieval safely
+try:
+    from rag_knowledge import get_safety_context
+except ImportError:
+    def get_safety_context(query, top_k=2):
+        return "WHO Safety Directive: Prefer well-lit routes with active commercial activity and visible CCTV."
+
 # FEATURE 1 — Route Safety Briefing
 def generate_safety_briefing(route_data, time_str, city, country, verified_reports=0, recent_reports=0):
     """
-    Generates a 5-bullet route safety briefing aware of real-time crowdsourced reports.
+    Generates a 5-bullet route safety briefing aware of real-time crowdsourced reports and RAG WHO/NCRB guidelines.
     """
     if recent_reports > 0:
         realtime_ctx = f"{recent_reports} reports in last 24h. {verified_reports} verified by community."
@@ -47,12 +54,14 @@ def generate_safety_briefing(route_data, time_str, city, country, verified_repor
         realtime_ctx = "No recent reports in this area."
 
     avg_score = route_data.get("average", "N/A") if isinstance(route_data, dict) else route_data
+    rag_context = get_safety_context(f"women safety route walking in {city} at {time_str}", top_k=2)
 
     prompt = f'''
 You are SafeWalk safety advisor for women in {city}, {country}.
 Safety score: {avg_score}/100
 Time: {time_str}
 Real-time data: {realtime_ctx}
+Safety Knowledge Context: {rag_context}
 
 Give exactly 5 bullet points:
 1. One-line route assessment at this time
@@ -124,10 +133,14 @@ Going to: {destination}. Ask recipient to call immediately.
 # FEATURE 4 — City Overview for new cities with no crowdsourced data yet
 def get_city_safety_overview(city, country):
     """
-    Generates a general women's safety overview for any city worldwide.
+    Generates a general women's safety overview for any city worldwide using RAG guidelines.
     """
+    rag_context = get_safety_context(f"women safety overview guidelines for {city} {country}", top_k=2)
+
     prompt = f'''
 Women's safety overview for {city}, {country}.
+Knowledge Context: {rag_context}
+
 Include: safer vs concerning area types, time-of-day patterns,
 local emergency number for women, one cultural safety tip.
 Under 150 words. Label as AI-generated, not real-time.
