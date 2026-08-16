@@ -1,7 +1,7 @@
-"""
+'''
 SafeWalk Interactive Terminal CLI Demo
 Allows user to test all SafeWalk features interactively in terminal.
-"""
+'''
 
 import sys
 import os
