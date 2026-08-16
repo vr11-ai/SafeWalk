@@ -1,6 +1,6 @@
 """
 SafeWalk Core Integration Service
-Connects backend (geocoder, router, DB, safety scorer) with AI backend (Gemini NLP, RAG, Briefings).
+Connects backend (geocoder, router, DB, safety scorer) with AI backend (Gemini NLP, RAG, News Fetcher, Briefings).
 """
 
 import sys
@@ -39,6 +39,7 @@ from genai_layer import (
     get_city_safety_overview,
 )
 from rag_knowledge import query_rag_knowledge, get_safety_context
+from news_incident_fetcher import fetch_news_incidents_for_city
 
 
 def initialize_safewalk_system():
@@ -153,6 +154,48 @@ def process_and_save_user_report(user_text: str, current_city: str = "Delhi", co
         "nlp_parsed": nlp_res,
         "saved_location": {"address": search_addr, "lat": lat, "lng": lng},
         "city_stats": updated_stats,
+    }
+
+
+def ingest_city_news_reports(city: str = "Delhi", country: str = "India") -> Dict[str, Any]:
+    """
+    AI News Ingestion Pipeline:
+    Fetches real-world reported safety incidents from news/NCRB bulletins for a city,
+    geocodes them, saves them to the DB, and recalculates safety weights.
+    """
+    raw_news = fetch_news_incidents_for_city(city, country)
+    ingested_count = 0
+
+    for item in raw_news:
+        loc_desc = item.get("location_description", city)
+        search_addr = f"{loc_desc}, {city}" if city not in loc_desc else loc_desc
+
+        lat, lng = geocode_address(search_addr)
+        if lat is None:
+            lat, lng = geocode_address(city)
+
+        if lat is not None:
+            save_incident(
+                lat=lat,
+                lng=lng,
+                inc_type=item.get("incident_type", "unsafe_area"),
+                severity=item.get("severity", 2),
+                time_of_day=item.get("time_of_day", "night"),
+                city=city,
+                country=country,
+                description=f"[{item.get('news_source', 'News Source')}] {item.get('description', '')}",
+            )
+            ingested_count += 1
+
+    update_all_weights()
+    updated_stats = get_city_stats(city)
+
+    return {
+        "success": True,
+        "city": city,
+        "ingested_count": ingested_count,
+        "raw_news_fetched": raw_news,
+        "updated_city_stats": updated_stats,
     }
 
 
