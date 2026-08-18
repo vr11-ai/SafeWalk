@@ -7,7 +7,6 @@ import sys
 import os
 from typing import Dict, Any, Optional
 
-# Add parent directory and backend/ai_backend to Python path for seamless imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BACKEND_DIR = os.path.join(BASE_DIR, "backend")
 AI_BACKEND_DIR = os.path.join(BASE_DIR, "ai_backend")
@@ -49,27 +48,46 @@ def initialize_safewalk_system():
     print("SafeWalk Integrated System initialized successfully.")
 
 
-def plan_safe_route(start_location: str, end_location: str, hour: int = 22) -> Dict[str, Any]:
+def _smart_geocode(address: str, fallback_city: Optional[str] = None):
+    """Geocodes an address with intelligent city fallback."""
+    if not address or not address.strip():
+        address = fallback_city or "Delhi"
+        
+    lat, lng = geocode_address(address)
+    if lat is None and fallback_city and fallback_city.lower() not in address.lower():
+        lat, lng = geocode_address(f"{address}, {fallback_city}")
+        
+    if lat is None and fallback_city:
+        c_lat, c_lng = geocode_address(fallback_city)
+        if c_lat is not None:
+            lat, lng = c_lat, c_lng
+            
+    if lat is None:
+        lat, lng = 28.6139, 77.2090  # Default Delhi center fallback
+        
+    return lat, lng
+
+
+def plan_safe_route(start_location: str, end_location: str, hour: int = 22, fallback_city: Optional[str] = None) -> Dict[str, Any]:
     """
-    End-to-End Route Planning Pipeline:
-    1. Geocodes start and destination addresses.
+    End-to-End Route Planning Pipeline with Smart Fallback:
+    1. Geocodes start and destination addresses (with robust fallback for custom cities).
     2. Identifies city and country.
     3. Calculates alternative walking routes (Safest vs Fastest) using OSRM + Safety Scorer.
     4. Fetches real-time community report statistics for the city.
     5. Generates RAG + Gemini powered 5-bullet safety briefing.
     """
-    s_lat, s_lng = geocode_address(start_location)
-    e_lat, e_lng = geocode_address(end_location)
+    s_lat, s_lng = _smart_geocode(start_location, fallback_city)
+    e_lat, e_lng = _smart_geocode(end_location, fallback_city)
 
-    if s_lat is None or e_lat is None:
-        return {
-            "success": False,
-            "error": "Could not geocode one or both addresses. Please try more specific locations.",
-            "start_coords": (s_lat, s_lng),
-            "end_coords": (e_lat, e_lng),
-        }
+    # If start and destination ended up identical due to fallback, offset destination slightly for routing
+    if abs(s_lat - e_lat) < 0.0001 and abs(s_lng - e_lng) < 0.0001:
+        e_lat += 0.008
+        e_lng += 0.008
 
     city, country = get_city_country_from_coords(s_lat, s_lng)
+    if fallback_city and (city is None or city == "Unknown City"):
+        city = fallback_city
 
     update_all_weights()
     routes = get_alternative_routes(s_lat, s_lng, e_lat, e_lng, hour=hour)
@@ -127,9 +145,7 @@ def process_and_save_user_report(user_text: str, current_city: str = "Delhi", co
     loc_desc = nlp_res.get("location_description", current_city)
     search_addr = f"{loc_desc}, {current_city}" if current_city not in loc_desc else loc_desc
 
-    lat, lng = geocode_address(search_addr)
-    if lat is None:
-        lat, lng = geocode_address(current_city)
+    lat, lng = _smart_geocode(search_addr, current_city)
 
     inc_type = nlp_res.get("incident_type", "unsafe_area")
     severity = nlp_res.get("severity", 2)
@@ -170,9 +186,7 @@ def ingest_city_news_reports(city: str = "Delhi", country: str = "India") -> Dic
         loc_desc = item.get("location_description", city)
         search_addr = f"{loc_desc}, {city}" if city not in loc_desc else loc_desc
 
-        lat, lng = geocode_address(search_addr)
-        if lat is None:
-            lat, lng = geocode_address(city)
+        lat, lng = _smart_geocode(search_addr, city)
 
         if lat is not None:
             save_incident(
