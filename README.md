@@ -24,7 +24,51 @@
 
 ---
 
-## 🔄 2. How It Works (System Workflow & Architecture)
+## 🎨 2. Frontend User Interface & Experience (`frontend/`)
+
+The SafeWalk frontend is built using **Streamlit** integrated with **Folium / Leaflet.js** for high-performance interactive mapping, wrapped in a sleek **Dark Mode Design System** (`#0e1117` background with `#00F2FE` gradient accents).
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                               SAFEWALK FRONTEND ARCHITECTURE                             │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+  [Sidebar Control Panel]                 [Main Interface Tabs]
+  ├─ Active City Selector                 ├─ 🗺️ Tab 1: Safe Route Finder & Folium Map
+  ├─ Travel Time Slider (0-23h)           ├─ 📢 Tab 2: Natural Language Incident Report
+  ├─ 📰 Fetch AI News Button              ├─ 🔥 Tab 3: Live Community Feed & Upvoting
+  └─ 🌐 City Safety Overview              └─ 🧠 Tab 4: RAG Safety Assistant & Emergency SOS
+```
+
+### 🖥️ Frontend Modules & Features Breakdown:
+
+#### 1. 🗺️ Tab 1: Safe Route Finder & Interactive Map
+- **Location Input Bar:** Single clean input row with quick 1-click landmark suggestion chips (`📌 Clock Tower`, `📌 UPES Bidholi`, `📌 Pacific Mall`). Supports typing any custom address directly.
+- **CartoDB Dark Matter Folium Map:**
+  - 🟢 **Safest Route Polyline:** Drawn in vibrant Emerald Green (`#10B981`, weight 6) with safety score tooltips out of 100.
+  - 🔴 **Fastest Route Polyline:** Drawn in Dashed Red (`#EF4444`, weight 4) for instant visual comparison.
+  - Start (`▶` Green) and Destination (`🚩` Blue) pin markers.
+  - Red pulse Danger Zone circles ($<50$ safety score).
+  - Recency Decay HeatMap overlay ($0.05-1.0$ weight gradient).
+- **Route Metrics Panel:** Displays Safety Score badge, Walk Time duration, Danger Zone count, and Extra Time detour penalty.
+- **🤖 AI Route Safety Briefing:** Real-time 5-bullet route guidance powered by Gemini 1.5 Flash + WHO/NCRB knowledge.
+
+#### 2. 📢 Tab 2: Natural Language Incident Reporting
+- **Free-Text Incident Area:** Women report incidents in plain English or Hindi (e.g. *"Catcalling and aggressive shouting near HKV parking lot at 10pm"*).
+- **Gemini NLP Extraction:** Parses structured JSON (`location_description`, `incident_type`, `severity`, `time_of_day`) automatically without manual forms.
+- **Instant Weight Recalculation:** Submitting a report triggers balloons 🎉, updates SQLite DB, and recalculates recency weights immediately.
+
+#### 3. 🔥 Tab 3: Live Community Feed & Upvoting
+- **City Metrics Bar:** Displays Total Reports, Last 24 Hours count, Verified Reports count, and Average Severity ($1-3$).
+- **Live Feed Cards:** Real-time report cards with time-ago indicators (`🕒 15m ago`, `🕒 2h ago`), severity color icons, and source tags.
+- **👍 Upvote / 👎 Downvote Buttons:** Session-based voting deduplication. Reports receiving $3+$ community upvotes automatically earn a **✔ Verified Badge** and receive a $1.3\times$ weight boost.
+
+#### 4. 🧠 Tab 4: RAG AI Safety Assistant & Emergency SOS
+- **RAG Q&A Assistant:** Users ask any women's safety question (e.g. *"What should I do if I feel followed at night?"*) and receive guidance grounded in WHO & NCRB guidelines, with an expandable retrieved context viewer.
+- **Emergency SOS SMS Generator:** Generates a formatted 160-character emergency SMS containing the user's name, current location, destination, and urgent call to action.
+
+---
+
+## 🔄 3. How It Works (System Workflow & Architecture)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
@@ -67,7 +111,7 @@
 
 ---
 
-## 📁 3. Project Directory Structure
+## 📁 4. Project Directory Structure
 
 ```text
 SafeWalk/
@@ -102,7 +146,7 @@ SafeWalk/
 
 ---
 
-## ⚡ 4. Setup & Running Guide
+## ⚡ 5. Setup & Running Guide
 
 ### 1️⃣ Installation & Environment Setup
 Clone the repository and install the dependencies:
@@ -154,7 +198,7 @@ python backend/test_integration.py
 
 ---
 
-## 🏆 5. Key Differentiators & Judge Talking Points
+## 🏆 6. Key Differentiators & Judge Talking Points
 
 | Feature | Competitors (Google Maps, Waze) | SafeWalk v2.0 |
 | :--- | :--- | :--- |
@@ -170,7 +214,7 @@ python backend/test_integration.py
 
 ---
 
-## 📜 6. License & Credits
+## 📜 7. License & Credits
 
 Built with ❤️ by **Team SafeWalk** (UPES Dehradun, 2026).  
 Powered by **Google Gemini AI**, **OpenStreetMap**, **OSRM**, **ReportLab**, and **Streamlit**.
