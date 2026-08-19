@@ -103,7 +103,7 @@ The SafeWalk frontend is built using **Streamlit** integrated with **Folium / Le
    - Sorts routes so `routes[0]` is the **Safest Route** (Green) and `routes[-1]` is the **Fastest Route** (Red/Dashed).
 4. **Natural Language Reporting & Decay Flywheel:**
    When a user reports an incident in plain text, `genai_layer.process_incident_report()` uses Gemini NLP to extract structured JSON. The incident is saved into SQLite (`safewalk.db`) and `report_manager.update_all_weights()` recalculates all incident weights using the 48-hour half-life decay formula:
-   $$	ext{Weight} = e^{-0.693 	imes rac{	ext{hours\_ago}}{48}} 	imes 	ext{Trust Modifier} 	imes 	ext{Verified Bonus}$$
+   $$\text{Weight} = e^{-0.693 \times \frac{\text{hours\_ago}}{48}} \times \text{Trust Modifier} \times \text{Verified Bonus}$$
 5. **AI News & Open Data Ingestion:**
    `news_incident_fetcher.py` queries Gemini AI with Search Grounding to fetch recent news reports, police advisories, and NCRB crime data for the active city, geocodes them, and ingests them into `safewalk.db`.
 6. **RAG-Grounded AI Safety Briefing:**
