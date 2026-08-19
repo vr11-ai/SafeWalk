@@ -1,7 +1,8 @@
-# app.py - SafeWalk Streamlit Frontend (Seamless Direct Custom Location Typing)
+# app.py - SafeWalk Streamlit Frontend (Security Hardened against XSS)
 import os
 import sys
 import uuid
+import html
 from datetime import datetime
 import streamlit as st
 from streamlit_folium import st_folium
@@ -117,10 +118,10 @@ with st.sidebar:
             target_city = cust_city.strip().title() if cust_city.strip() else sel_city
             lat_c, lng_c = geocode_address(target_city)
             if lat_c is not None:
-                st.session_state.city = target_city
+                st.session_state.city = html.escape(target_city)[:40]
                 st.session_state.map_center = [lat_c, lng_c]
                 city_g, country_g = get_city_country_from_coords(lat_c, lng_c)
-                st.session_state.country = country_g if country_g != "Unknown Country" else "Worldwide"
+                st.session_state.country = html.escape(country_g if country_g != "Unknown Country" else "Worldwide")[:40]
                 st.session_state.routes = []
                 st.session_state.current_briefing = None
                 st.success(f"Active city set to **{st.session_state.city}**!")
@@ -148,14 +149,14 @@ with st.sidebar:
 
     if st.session_state.ai_overview:
         ov_c, ov_t = st.session_state.ai_overview
-        st.info(f"**Overview for {ov_c}:**\n\n{ov_t}")
+        st.info(f"**Overview for {html.escape(ov_c)}:**\n\n{html.escape(ov_t)}")
         
     st.divider()
     st.caption(f"Session ID: `{st.session_state.session_id}`")
 
 # Header Section
 st.markdown('<div class="main-title">🛡️ SafeWalk — AI Women&#39;s Safety Navigation</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="sub-title">Real-time crowdsourced safety routes & Gemini AI guidance for <b>{st.session_state.city}, {st.session_state.country}</b></div>', unsafe_allow_html=True)
+st.markdown(f'<div class="sub-title">Real-time crowdsourced safety routes & Gemini AI guidance for <b>{html.escape(st.session_state.city)}, {html.escape(st.session_state.country)}</b></div>', unsafe_allow_html=True)
 
 # Tabs
 tab1, tab2, tab3, tab4 = st.tabs([
@@ -171,7 +172,6 @@ tab1, tab2, tab3, tab4 = st.tabs([
 with tab1:
     landmarks = get_city_landmark_suggestions(st.session_state.city)
     
-    # Initialize default inputs if not set
     if "s_input_val" not in st.session_state:
         st.session_state.s_input_val = landmarks[0] if len(landmarks) > 0 else f"Clock Tower, {st.session_state.city}"
     if "d_input_val" not in st.session_state:
@@ -231,7 +231,7 @@ with tab1:
     col_map, col_report = st.columns([7, 5])
     
     with col_map:
-        st.markdown(f"### 📍 Interactive Map: {st.session_state.city}, {st.session_state.country}")
+        st.markdown(f"### 📍 Interactive Map: {html.escape(st.session_state.city)}, {html.escape(st.session_state.country)}")
         m = build_safety_map(center=st.session_state.map_center)
         if m is not None:
             if len(st.session_state.routes) >= 2:
@@ -297,7 +297,7 @@ with tab2:
                 st.error("Could not process report. Please be more specific.")
 
 # -----------------------------------------------------------------------------
-# TAB 3: LIVE FEED & VOTING
+# TAB 3: LIVE FEED & VOTING (XSS Protected)
 # -----------------------------------------------------------------------------
 with tab3:
     st.markdown(f"### 🔥 Live Community Incident Feed for {st.session_state.city}")
@@ -324,12 +324,16 @@ with tab3:
             badge = " <span class='verified-badge'>✔ Verified</span>" if ver else ""
             sc_icon = "🔴" if sev == 3 else "🟠" if sev == 2 else "🟡"
             
+            # HTML XSS Sanitization
+            safe_desc = html.escape(str(desc)) if desc else ""
+            safe_type = html.escape(str(inc_type))
+            
             with st.container():
                 ci, cv = st.columns([4, 1])
                 with ci:
-                    st.markdown(f"**{sc_icon} {str(inc_type).upper()}{badge}** • <small>{tlabel}</small>", unsafe_allow_html=True)
-                    if desc:
-                        st.write(desc)
+                    st.markdown(f"**{sc_icon} {safe_type.upper()}{badge}** • <small>{tlabel}</small>", unsafe_allow_html=True)
+                    if safe_desc:
+                        st.write(safe_desc)
                     st.caption(f"Coordinates: ({rlat}, {rlng}) • Upvotes: {up}")
                 with cv:
                     if inc_id in st.session_state.voted:
@@ -385,6 +389,6 @@ with tab4:
         if sos_gen_btn:
             if sos_user.strip():
                 sms_msg = generate_sos_message(sos_user, sos_start, sos_dest, st.session_state.city)
-                st.warning(f"**SMS Alert Text (<160 chars):**\n\n{sms_msg}")
+                st.warning(f"**SMS Alert Text (<160 chars):**\n\n{html.escape(sms_msg)}")
             else:
                 st.warning("Please enter your name for the emergency alert.")
