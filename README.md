@@ -5,6 +5,7 @@
 [![Gemini 1.5 Flash](https://img.shields.io/badge/AI-Gemini%201.5%20Flash-orange.svg)](https://deepmind.google/technologies/gemini/)
 [![RAG Architecture](https://img.shields.io/badge/RAG-WHO%20%26%20NCRB%20Grounded-green.svg)]()
 [![OpenStreetMap / OSRM](https://img.shields.io/badge/Navigation-OSRM%20%2B%20Overpass-brightgreen.svg)]()
+[![Security Hardened](https://img.shields.io/badge/Security-OWASP%20Hardened-success.svg)]()
 
 ---
 
@@ -12,15 +13,18 @@
 
 **SafeWalk** is an AI-powered real-time women's safety navigation network and risk briefing system. While conventional navigation platforms optimize purely for travel duration, SafeWalk evaluates pedestrian routes across **6 critical safety dimensions**—combining live crowdsourced reports, OpenStreetMap infrastructural data (streetlights, POIs, police proximity), real-time AI news alerts, and WHO/NCRB grounded RAG AI briefings.
 
-### 🌟 Key Features & Capabilities
+### 🌟 Key Features & Latest Architectural Upgrades
 - **Global Custom City Support:** Works seamlessly for **ANY city worldwide** (Dehradun, Delhi, Mumbai, Bengaluru, Tokyo, London, Paris, NYC, Sydney) with auto-geocoding and instant map re-centering.
-- **High-Precision Multi-Stage Geocoding:** Custom local landmark database (Chowks, Colleges, Metro Exits, Malls) combined with Nominatim fallback for 100% exact GPS coordinates.
-- **100% Real Pedestrian Road Geometry:** HTTPS OSRM foot router yields **280 to 650+ precise street points** following actual roads, sidewalks, footpaths, and turns.
-- **Real-Time Recency Decay Flywheel:** Incidents carry maximum weight ($1.0$) when fresh and automatically decay over time (48-hour half-life exponential curve), keeping the map sensitive to immediate risks.
+- **High-Precision Multi-Stage Geocoding:** Custom local landmark database (Chowks, Colleges, Metro Exits, Malls) combined with suffix cleaning and Nominatim search for 100% exact GPS coordinates.
+- **100% Real Pedestrian Road Geometry:** HTTPS OSRM foot router yields **280 to 650+ precise street points** following actual roads, sidewalks, footpaths, and turns (zero straight lines!).
+- **110-Meter Fine-Grained Spatial Cache Grid:** OpenStreetMap safety evaluation runs on a fine **110-meter spatial grid** (`round(lat, 3), round(lng, 3)`), ensuring every street corner, unlit alley, and main road receives unique, highly dynamic safety scores.
+- **Continuous Sinusoidal Daylight Curve:** Replaced discrete step functions with a smooth mathematical daylight curve ($\cos(	ext{hour})$), continuously scaling time penalties from $0$ points at peak daylight ($14:00$) to $-30$ points at peak darkness ($02:00	ext{ AM}$).
+- **Real-Time Recency Decay Flywheel:** Incidents carry maximum weight ($1.0$) when fresh and automatically decay over time ($48$-hour half-life exponential curve), keeping the map sensitive to immediate risks.
 - **Natural Language Incident Reporting:** Women report harassment or unsafe areas in plain English or Hindi without complex forms—Gemini NLP extracts structured details automatically.
 - **AI News & NCRB Crime Alert Ingester:** Gemini AI + Search Grounding fetches live news reports, police advisories, and NCRB crime data for the active city and ingests them into the live safety map.
 - **RAG-Grounded Safety Briefings:** Generates tailored 5-bullet route advisories grounded in official **WHO Safety Directives** and **NCRB Analytical Insights**.
-- **Community Upvoting & Verification:** $3+$ community upvotes award a **Verified Badge** and apply a $1.3\times$ trust weight multiplier to high-risk zones.
+- **Community Upvoting & Verification:** $3+$ community upvotes award a **✔ Verified Badge** and apply a $1.3x$ trust weight multiplier to high-risk zones.
+- **Security Hardened (OWASP Protection):** Full HTML XSS escaping via `html.escape()`, API key validation, prompt injection `<USER_REPORT>` XML boundary tags, and thread-safe SQLite context managers.
 
 ---
 
@@ -50,7 +54,7 @@ The SafeWalk frontend is built using **Streamlit** integrated with **Folium / Le
   - Red pulse Danger Zone circles ($<50$ safety score).
   - Recency Decay HeatMap overlay ($0.05-1.0$ weight gradient).
 - **Route Metrics Panel:** Displays Safety Score badge, Walk Time duration, Danger Zone count, and Extra Time detour penalty.
-- **🤖 AI Route Safety Briefing:** Real-time 5-bullet route guidance powered by Gemini 1.5 Flash + WHO/NCRB knowledge.
+- **🤖 AI Route Safety Briefing:** Real-time 5-bullet route guidance powered by Gemini Flash + WHO/NCRB knowledge.
 
 #### 2. 📢 Tab 2: Natural Language Incident Reporting
 - **Free-Text Incident Area:** Women report incidents in plain English or Hindi (e.g. *"Catcalling and aggressive shouting near HKV parking lot at 10pm"*).
@@ -60,10 +64,10 @@ The SafeWalk frontend is built using **Streamlit** integrated with **Folium / Le
 #### 3. 🔥 Tab 3: Live Community Feed & Upvoting
 - **City Metrics Bar:** Displays Total Reports, Last 24 Hours count, Verified Reports count, and Average Severity ($1-3$).
 - **Live Feed Cards:** Real-time report cards with time-ago indicators (`🕒 15m ago`, `🕒 2h ago`), severity color icons, and source tags.
-- **👍 Upvote / 👎 Downvote Buttons:** Session-based voting deduplication. Reports receiving $3+$ community upvotes automatically earn a **✔ Verified Badge** and receive a $1.3\times$ weight boost.
+- **👍 Upvote / 👎 Downvote Buttons:** Session-based voting deduplication. Reports receiving $3+$ community upvotes automatically earn a **✔ Verified Badge** and receive a $1.3x$ weight boost.
 
 #### 4. 🧠 Tab 4: RAG AI Safety Assistant & Emergency SOS
-- **RAG Q&A Assistant:** Users ask any women's safety question (e.g. *"What should I do if I feel followed at night-*) and receive guidance grounded in WHO & NCRB guidelines, with an expandable retrieved context viewer.
+- **RAG Q&A Assistant:** Users ask any women's safety question (e.g. *"What should I do if I feel followed at night?"*) and receive guidance grounded in WHO & NCRB guidelines, with an expandable retrieved context viewer.
 - **Emergency SOS SMS Generator:** Generates a formatted 160-character emergency SMS containing the user's name, current location, destination, and urgent call to action.
 
 ---
@@ -83,7 +87,7 @@ The SafeWalk frontend is built using **Streamlit** integrated with **Folium / Le
                                                                           ▼
    [AI & RAG Layer]            [Community & News Flywheel]       [Dual Route Output]
  RAG WHO/NCRB Engine  ◄─── Real-Time Incident Persistence  ◄─── 🟢 Safest Route (Score: 84)
- Gemini 1.5 Briefing       ├─► Gemini NLP Text Parser          🔴 Fastest Route (Score: 52)
+ Gemini Flash Briefing     ├─► Gemini NLP Text Parser          🔴 Fastest Route (Score: 52)
  5-Bullet Guidance         ├─► AI News & Alert Ingestor        📍 Danger Zone Markers
                            └─► 3+ Vote Community Verification
 ```
@@ -95,17 +99,17 @@ The SafeWalk frontend is built using **Streamlit** integrated with **Folium / Le
    `router.get_alternative_routes()` queries HTTPS OSRM endpoints (`https://router.project-osrm.org/route/v1/foot`) to fetch candidate walking paths containing up to 650+ pedestrian street points following actual roads and turns.
 3. **Multi-Factor Safety Scoring (0 - 100):**
    `safety_scorer.calculate_safety_score()` evaluates coordinates along each route:
-   - **Time of Day:** Nighttime ($10:00 PM – 04:00 AM$) applies up to $-30$ penalty.
-   - **Weighted Incidents:** Sum of active incident weights $	imes$ severities near the route.
+   - **Continuous Time of Day Penalty:** Smooth sinusoidal curve (up to $-30$ penalty at 02:00 AM).
+   - **Weighted Incidents:** Sum of active incident weights x severities near the route.
    - **Streetlights:** $+0$ for lit streets, $-20$ for unlit streets.
    - **POI Density:** High shop/amenity density adds up to $+15$ bonus.
-   - **Police Proximity:** Police stations within $800 meters$ add $+10$ bonus.
+   - **Police Proximity:** Police stations within $800	ext{m}$ add $+10$ bonus.
    - Sorts routes so `routes[0]` is the **Safest Route** (Green) and `routes[-1]` is the **Fastest Route** (Red/Dashed).
 4. **Natural Language Reporting & Decay Flywheel:**
    When a user reports an incident in plain text, `genai_layer.process_incident_report()` uses Gemini NLP to extract structured JSON. The incident is saved into SQLite (`safewalk.db`) and `report_manager.update_all_weights()` recalculates all incident weights using the 48-hour half-life decay formula:
-   ```math
-Weight = e^(-0.693 × hours_ago / 48) × Trust_Modifier × Verified_Bonus
-```
+   ```text
+   Weight = e^(-0.693 * hours_ago / 48) * Trust_Modifier * Verified_Bonus
+   ```
 5. **AI News & Open Data Ingestion:**
    `news_incident_fetcher.py` queries Gemini AI with Search Grounding to fetch recent news reports, police advisories, and NCRB crime data for the active city, geocodes them, and ingests them into `safewalk.db`.
 6. **RAG-Grounded AI Safety Briefing:**
@@ -119,7 +123,7 @@ Weight = e^(-0.693 × hours_ago / 48) × Trust_Modifier × Verified_Bonus
 SafeWalk/
 │
 ├── ai_backend/                       # AI & RAG Layer
-│   ├── genai_layer.py                # Gemini 1.5 Flash: Briefings, Incident NLP, SOS SMS
+│   ├── genai_layer.py                # Gemini AI: Briefings, Incident NLP, SOS SMS
 │   ├── news_incident_fetcher.py       # AI News Ingestion: News alerts & NCRB data fetcher
 │   └── rag_knowledge.py               # RAG Engine: WHO Guidelines + NCRB Insights vector store
 │
@@ -206,12 +210,13 @@ python backend/test_integration.py
 | :--- | :--- | :--- |
 | **Route Optimization** | Purely fastest time ($m/min$) | Dual Routes: **Safest** ($0-100$) vs **Fastest** |
 | **Route Geometry** | Basic line path | **100% Real Pedestrian Road Geometry (OSRM)** |
+| **Spatial Precision** | Standard city search | **110-Meter Fine-Grained Grid Caching** |
 | **Geocoding Accuracy** | Standard address lookup | **Multi-Stage Landmark Table & Precision Bounds** |
 | **Incident Decay** | Static or binary flags | Exponential decay curve ($48	ext{h}$ half-life) |
 | **Reporting Interface** | Multi-step manual forms | Natural Language text (English/Hindi) via Gemini NLP |
-| **AI News Ingestion** | None | Real-time news alerts & NCRB crime ingestion |
+| **Security Hardening** | Standard web security | **XSS Escaping, Prompt Injection Tags, Thread-Safe DB** |
 | **AI Safety Guidance** | None | 5-bullet briefing grounded in WHO/NCRB RAG context |
-| **Community Trust** | Unverified user reports | 3+ upvote verification badge & 1.3x weight boost |
+| **Community Trust** | Unverified user reports | 3+ upvote verification badge & $1.3x$ weight boost |
 | **Global Scale** | Limited to partnered cities | Global support for any city via OpenStreetMap & Nominatim |
 
 ---
