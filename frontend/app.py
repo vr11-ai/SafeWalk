@@ -172,17 +172,23 @@ tab1, tab2, tab3, tab4 = st.tabs([
 with tab1:
     landmarks = get_city_landmark_suggestions(st.session_state.city)
     
-    if "s_input_val" not in st.session_state:
-        st.session_state.s_input_val = landmarks[0] if len(landmarks) > 0 else f"Clock Tower, {st.session_state.city}"
-    if "d_input_val" not in st.session_state:
-        st.session_state.d_input_val = landmarks[1] if len(landmarks) > 1 else f"UPES Bidholi, {st.session_state.city}"
+    # Auto-update widget state when city changes or defaults are unset
+    default_start = landmarks[0] if len(landmarks) > 0 else f"Clock Tower, {st.session_state.city}"
+    default_dest = landmarks[1] if len(landmarks) > 1 else f"UPES Bidholi, {st.session_state.city}"
 
-    st.markdown(f"#### 📍 Quick Suggestions for **{st.session_state.city}**:")
+    if "direct_start_text_input" not in st.session_state or st.session_state.get("active_city_tracker") != st.session_state.city:
+        st.session_state["direct_start_text_input"] = default_start
+    if "direct_dest_text_input" not in st.session_state or st.session_state.get("active_city_tracker") != st.session_state.city:
+        st.session_state["direct_dest_text_input"] = default_dest
+    st.session_state["active_city_tracker"] = st.session_state.city
+
+    st.markdown(f"#### 📍 Quick Destination Suggestions for **{st.session_state.city}**:")
     sug_cols = st.columns(min(len(landmarks), 5))
     for idx, lm in enumerate(landmarks[:5]):
         with sug_cols[idx]:
-            if st.button(f"📌 {lm.split(',')[0]}", key=f"lm_chip_{idx}"):
-                st.session_state.d_input_val = lm
+            chip_label = f"📌 {lm.split(',')[0]}"
+            if st.button(chip_label, key=f"lm_chip_{idx}"):
+                st.session_state["direct_dest_text_input"] = lm
                 st.rerun()
 
     with st.form("route_planning_form"):
@@ -191,7 +197,6 @@ with tab1:
         with col_in1:
             start_input = st.text_input(
                 f"Start Location in {st.session_state.city}:",
-                value=st.session_state.s_input_val,
                 placeholder=f"Type ANY location in {st.session_state.city}...",
                 key="direct_start_text_input"
             )
@@ -199,7 +204,6 @@ with tab1:
         with col_in2:
             end_input = st.text_input(
                 f"Destination in {st.session_state.city}:",
-                value=st.session_state.d_input_val,
                 placeholder=f"Type ANY location in {st.session_state.city}...",
                 key="direct_dest_text_input"
             )
