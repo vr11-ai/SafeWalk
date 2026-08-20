@@ -111,12 +111,9 @@ Provide a clear, 3-point actionable answer (under 120 words). Be empathetic, pra
     }
 
 
-def query_rag_knowledge(query: str, top_k: int = 2) -> str:
-    """Returns top matching WHO/NCRB knowledge guidelines."""
-    q_clean = query.lower()
-    words = [w for w in re.findall(r'\w+', q_clean) if len(w) > 3]
-    matched = [k for k in WHO_NCRB_KNOWLEDGE if any(w in k.lower() for w in words)]
-    return "\n".join(matched[:top_k]) if matched else WHO_NCRB_KNOWLEDGE[0]
+def query_rag_knowledge(query: str, top_k: int = 2, city: str = "Delhi", country: str = "India") -> dict:
+    """Returns top matching WHO/NCRB knowledge guidelines and AI advice."""
+    return ask_safewalk_ai(query, city=city, country=country)
 
 
 def get_safety_context(city: str = "Delhi") -> str:

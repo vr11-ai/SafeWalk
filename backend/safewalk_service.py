@@ -37,7 +37,7 @@ from genai_layer import (
     generate_sos_message,
     get_city_safety_overview,
 )
-from rag_knowledge import query_rag_knowledge, get_safety_context
+from rag_knowledge import ask_safewalk_ai as ask_rag_ai, query_rag_knowledge, get_safety_context
 from news_incident_fetcher import fetch_news_incidents_for_city
 
 
@@ -239,4 +239,4 @@ def ask_safewalk_ai(user_query: str, city: str = "Delhi", country: str = "India"
     RAG Assistant Query Pipeline:
     Retrieves WHO/NCRB guidelines and generates tailored AI advice.
     """
-    return query_rag_knowledge(user_query, city=city, country=country)
+    return ask_rag_ai(user_query, city=city, country=country)
