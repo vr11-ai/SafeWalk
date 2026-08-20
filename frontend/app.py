@@ -374,13 +374,19 @@ with tab4:
             )
             rag_ask_btn = st.form_submit_button("🔍 Ask AI Assistant")
             
-        if rag_ask_btn:
+        if "rag_last_response" not in st.session_state:
+            st.session_state.rag_last_response = None
+            
+        if rag_ask_btn and user_q.strip():
             with st.spinner("Searching WHO/NCRB knowledge base & Gemini AI..."):
-                rag_out = ask_safewalk_ai(user_q, city=st.session_state.city, country=st.session_state.country)
-                st.markdown("#### 💡 AI Guidance:")
-                st.info(rag_out["answer"])
-                with st.expander("Show Retrieved Knowledge Base Context"):
-                    st.text(rag_out.get("retrieved_context", ""))
+                st.session_state.rag_last_response = ask_safewalk_ai(user_q, city=st.session_state.city, country=st.session_state.country)
+                
+        if st.session_state.rag_last_response:
+            rag_out = st.session_state.rag_last_response
+            st.markdown("#### 💡 AI Guidance:")
+            st.info(rag_out["answer"])
+            with st.expander("Show Retrieved Knowledge Base Context"):
+                st.text(rag_out.get("retrieved_context", ""))
                     
     with col_sos:
         st.markdown("### 🆘 Emergency SOS Alert Generator")
