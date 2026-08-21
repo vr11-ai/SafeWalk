@@ -1,60 +1,48 @@
-"""
-High-Precision Geocoder Module using Multi-Stage Matching & OpenStreetMap Nominatim.
-Converts local address strings, chowks, markets, and colleges to exact lat/lng coordinates.
-"""
-
-import time
+# geocoder.py - High-Precision Multi-Stage Geocoder & City Landmark Engine
 import requests
 import re
+import time
 from functools import lru_cache
 from typing import Tuple, Optional, List
 
 _GEOCODE_CACHE = {}
 
-# Exact High-Precision Landmark Coordinates Database
+# Pre-indexed exact GPS coordinates for popular city landmarks
 EXACT_LANDMARKS = {
     # Dehradun
-    "clock tower, dehradun": (30.32432, 78.04186),
-    "clock tower": (30.32432, 78.04186),
-    "ghanta ghar, dehradun": (30.32432, 78.04186),
-    "upes, dehradun": (30.41761, 77.96827),
-    "upes bidholi campus, dehradun": (30.41761, 77.96827),
-    "upes bidholi, dehradun": (30.41761, 77.96827),
-    "upes kandoli campus, dehradun": (30.40455, 77.96918),
-    "upes kandoli, dehradun": (30.40455, 77.96918),
-    "pacific mall, rajpur road, dehradun": (30.36647, 78.06734),
-    "pacific mall, dehradun": (30.36647, 78.06734),
-    "isbt dehradun": (30.28688, 77.99845),
-    "isbt, dehradun": (30.28688, 77.99845),
-    "dehradun railway station": (30.31649, 78.03219),
-    "ballupur chowk, dehradun": (30.33405, 78.00624),
-    "ballupur, dehradun": (30.33405, 78.00624),
-    "forest research institute (fri), dehradun": (30.34444, 78.00333),
-    "fri, dehradun": (30.34444, 78.00333),
-    "clement town, dehradun": (30.26781, 78.00693),
-    "graphic era university, dehradun": (30.27301, 78.00762),
-    "graphic era, dehradun": (30.27301, 78.00762),
-    "dit university, dehradun": (30.39801, 78.07722),
-    "rajpur road, dehradun": (30.35411, 78.06102),
-    "jakhan, dehradun": (30.36015, 78.06452),
+    "clock tower, dehradun": (30.32433, 78.04191),
+    "upes bidholi campus, dehradun": (30.41520, 77.96540),
+    "upes bidholi, dehradun": (30.41520, 77.96540),
+    "upes kandoli campus, dehradun": (30.40210, 77.96800),
+    "upes kandoli, dehradun": (30.40210, 77.96800),
+    "pacific mall, rajpur road, dehradun": (30.36020, 78.06780),
+    "pacific mall, dehradun": (30.36020, 78.06780),
+    "isbt dehradun": (30.28710, 77.99720),
+    "dehradun railway station": (30.31650, 78.03220),
+    "forest research institute (fri), dehradun": (30.34290, 78.00060),
+    "fri, dehradun": (30.34290, 78.00060),
+    "ballupur chowk, dehradun": (30.33470, 78.01250),
+    "clement town, dehradun": (30.26810, 78.00710),
+    "graphic era university, dehradun": (30.26860, 78.00620),
+    "dit university, dehradun": (30.39800, 78.07500),
+    "jakhan, dehradun": (30.36210, 78.06820),
     "prem nagar, dehradun": (30.33754, 77.96022),
     "bidholi, dehradun": (30.41520, 77.96540),
+    
     # Delhi
     "connaught place, delhi": (28.6315, 77.2167),
     "hauz khas village, delhi": (28.5535, 77.1945),
     "lajpat nagar central market, delhi": (28.5677, 77.2433),
-    "lajpat nagar, delhi": (28.5677, 77.2433),
     "rajiv chowk metro station exit 2, delhi": (28.6328, 77.2197),
-    "rajiv chowk, delhi": (28.6328, 77.2197),
     "chandni chowk market, delhi": (28.6506, 77.2303),
     "select citywalk mall, saket, delhi": (28.5283, 77.2185),
-    "saket, delhi": (28.5283, 77.2185),
     "karol bagh main market, delhi": (28.6514, 77.1907),
     "india gate, delhi": (28.6129, 77.2295),
     "cyber hub, gurugram / delhi ncr": (28.4950, 77.0895),
     "aiims metro station, delhi": (28.5659, 77.2111),
     "khan market, delhi": (28.6002, 77.2273),
     "iit delhi main gate, delhi": (28.5450, 77.1926),
+    
     # Mumbai
     "marine drive, mumbai": (18.9440, 72.8230),
     "bandra kurla complex (bkc), mumbai": (19.0660, 72.8680),
@@ -65,6 +53,7 @@ EXACT_LANDMARKS = {
     "colaba causeway, mumbai": (18.9150, 72.8280),
     "lower parel phoenix mall, mumbai": (18.9950, 72.8240),
     "nariman point, mumbai": (18.9260, 72.8210),
+    
     # Bengaluru
     "mg road metro station, bengaluru": (12.9756, 77.6067),
     "indiranagar 100ft road, bengaluru": (12.9784, 77.6408),
@@ -74,6 +63,85 @@ EXACT_LANDMARKS = {
     "commercial street, bengaluru": (12.9822, 77.6083),
     "majestic bus stand, bengaluru": (12.9778, 77.5714),
     "cubbon park entrance, bengaluru": (12.9760, 77.5930),
+
+    # Kolkata
+    "park street, kolkata": (22.5552, 88.3518),
+    "howrah railway station, kolkata": (22.5840, 88.3426),
+    "victoria memorial, kolkata": (22.5448, 88.3426),
+    "salt lake sector 5, kolkata": (22.5726, 88.4332),
+    "new market, kolkata": (22.5601, 88.3526),
+    "esplanade metro station, kolkata": (22.5647, 88.3516),
+
+    # Chennai
+    "t nagar ranganathan street, chennai": (13.0405, 80.2337),
+    "marina beach promenade, chennai": (13.0500, 80.2824),
+    "anna nagar main road, chennai": (13.0850, 80.2101),
+    "chennai central railway station, chennai": (13.0827, 80.2755),
+    "nungambakkam high road, chennai": (13.0601, 80.2407),
+    "express avenue mall, royapettah, chennai": (13.0587, 80.2642),
+
+    # Hyderabad
+    "hitech city mindspace, hyderabad": (17.4435, 78.3772),
+    "charminar main market, hyderabad": (17.3616, 78.4747),
+    "gachibowli dlf cybercity, hyderabad": (17.4474, 78.3565),
+    "jubilee hills checkpost, hyderabad": (17.4325, 78.4071),
+    "secunderabad railway station, hyderabad": (17.4344, 78.5013),
+    "inorbit mall, madhapur, hyderabad": (17.4375, 78.3885),
+
+    # Tokyo
+    "shibuya crossing, tokyo": (35.6595, 139.7004),
+    "shinjuku station east exit, tokyo": (35.6909, 139.7003),
+    "ginza six shopping district, tokyo": (35.6696, 139.7640),
+    "akihabara electric town, tokyo": (35.6997, 139.7711),
+    "roppongi hills, tokyo": (35.6605, 139.7292),
+    "asakusa sensoji temple, tokyo": (35.7148, 139.7967),
+
+    # London
+    "oxford circus, london": (51.5152, -0.1419),
+    "piccadilly circus, london": (51.5101, -0.1342),
+    "covent garden market, london": (51.5117, -0.1240),
+    "soho square, london": (51.5150, -0.1320),
+    "king's cross st pancras station, london": (51.5309, -0.1238),
+    "trafalgar square, london": (51.5080, -0.1281),
+
+    # Paris
+    "champs-élysées avenue, paris": (48.8698, 2.3075),
+    "eiffel tower plaza, paris": (48.8584, 2.2945),
+    "le marais quarter, paris": (48.8570, 2.3590),
+    "châtelet–les halles station, paris": (48.8622, 2.3470),
+    "saint-germain-des-prés, paris": (48.8538, 2.3333),
+    "montmartre sacré-cœur, paris": (48.8867, 2.3431),
+
+    # New York
+    "times square, new york": (40.7580, -73.9855),
+    "grand central terminal, new york": (40.7527, -73.9772),
+    "union square, new york": (40.7359, -73.9911),
+    "washington square park, greenwich village, new york": (40.7308, -73.9973),
+    "herald square macy's, new york": (40.7508, -73.9890),
+    "soho broadway shopping district, new york": (40.7233, -74.0030),
+
+    # Lagos
+    "victoria island commercial hub, lagos": (6.4281, 3.4219),
+    "lekki phase 1 admiral way, lagos": (6.4474, 3.4723),
+    "ikoyi kingsway road, lagos": (6.4520, 3.4380),
+    "ikeja city mall, lagos": (6.6136, 3.3582),
+    "marina cms bus terminal, lagos": (6.4531, 3.3886),
+
+    # Dubai
+    "dubai mall main entrance, dubai": (25.1972, 55.2797),
+    "downtown dubai boulevard, dubai": (25.1950, 55.2780),
+    "dubai marina walk, dubai": (25.0772, 55.1332),
+    "mall of the emirates, dubai": (25.1181, 55.2006),
+    "deira city centre, dubai": (25.2517, 55.3331),
+    "business bay metro station, dubai": (25.1912, 55.2662),
+
+    # Singapore
+    "orchard road ion station, singapore": (1.3040, 103.8320),
+    "marina bay sands promenade, singapore": (1.2838, 103.8591),
+    "clarke quay riverside, singapore": (1.2905, 103.8462),
+    "bugis street market, singapore": (1.3008, 103.8550),
+    "raffles place financial hub, singapore": (1.2839, 103.8515),
+    "chinatown pagoda street, singapore": (1.2835, 103.8442),
 }
 
 CITY_LANDMARKS_DB = {
@@ -126,6 +194,85 @@ CITY_LANDMARKS_DB = {
         "Commercial Street, Bengaluru",
         "Majestic Bus Stand, Bengaluru",
         "Cubbon Park Entrance, Bengaluru",
+    ],
+    "kolkata": [
+        "Park Street, Kolkata",
+        "Howrah Railway Station, Kolkata",
+        "Victoria Memorial, Kolkata",
+        "Salt Lake Sector 5, Kolkata",
+        "New Market, Kolkata",
+        "Esplanade Metro Station, Kolkata",
+    ],
+    "chennai": [
+        "T Nagar Ranganathan Street, Chennai",
+        "Marina Beach Promenade, Chennai",
+        "Anna Nagar Main Road, Chennai",
+        "Chennai Central Railway Station, Chennai",
+        "Nungambakkam High Road, Chennai",
+        "Express Avenue Mall, Royapettah, Chennai",
+    ],
+    "hyderabad": [
+        "HITECH City Mindspace, Hyderabad",
+        "Charminar Main Market, Hyderabad",
+        "Gachibowli DLF Cybercity, Hyderabad",
+        "Jubilee Hills Checkpost, Hyderabad",
+        "Secunderabad Railway Station, Hyderabad",
+        "Inorbit Mall, Madhapur, Hyderabad",
+    ],
+    "tokyo": [
+        "Shibuya Crossing, Tokyo",
+        "Shinjuku Station East Exit, Tokyo",
+        "Ginza Six Shopping District, Tokyo",
+        "Akihabara Electric Town, Tokyo",
+        "Roppongi Hills, Tokyo",
+        "Asakusa Sensoji Temple, Tokyo",
+    ],
+    "london": [
+        "Oxford Circus, London",
+        "Piccadilly Circus, London",
+        "Covent Garden Market, London",
+        "Soho Square, London",
+        "King's Cross St Pancras Station, London",
+        "Trafalgar Square, London",
+    ],
+    "paris": [
+        "Champs-Élysées Avenue, Paris",
+        "Eiffel Tower Plaza, Paris",
+        "Le Marais Quarter, Paris",
+        "Châtelet–Les Halles Station, Paris",
+        "Saint-Germain-des-Prés, Paris",
+        "Montmartre Sacré-Cœur, Paris",
+    ],
+    "new york": [
+        "Times Square, New York",
+        "Grand Central Terminal, New York",
+        "Union Square, New York",
+        "Washington Square Park, Greenwich Village, New York",
+        "Herald Square Macy's, New York",
+        "SoHo Broadway Shopping District, New York",
+    ],
+    "lagos": [
+        "Victoria Island Commercial Hub, Lagos",
+        "Lekki Phase 1 Admiral Way, Lagos",
+        "Ikoyi Kingsway Road, Lagos",
+        "Ikeja City Mall, Lagos",
+        "Marina CMS Bus Terminal, Lagos",
+    ],
+    "dubai": [
+        "Dubai Mall Main Entrance, Dubai",
+        "Downtown Dubai Boulevard, Dubai",
+        "Dubai Marina Walk, Dubai",
+        "Mall of the Emirates, Dubai",
+        "Deira City Centre, Dubai",
+        "Business Bay Metro Station, Dubai",
+    ],
+    "singapore": [
+        "Orchard Road ION Station, Singapore",
+        "Marina Bay Sands Promenade, Singapore",
+        "Clarke Quay Riverside, Singapore",
+        "Bugis Street Market, Singapore",
+        "Raffles Place Financial Hub, Singapore",
+        "Chinatown Pagoda Street, Singapore",
     ],
 }
 

@@ -17,11 +17,11 @@ def generate_safety_briefing(route_data: any, time_str: str, city: str = "Delhi"
     country_safe = html.escape(str(country))[:50]
 
     return (
-        f"• 🟢 Route Safety Score for {city_safe}: {avg_score}/100 at {time_str}.\n"
-        f"• 💡 Stick to well-lit main arterial roads and avoid unlit alleyways or shortcuts.\n"
-        f"• 📱 Keep your mobile phone charged, GPS active, and emergency SOS contacts accessible.\n"
-        f"• 👥 Walk confidently near active storefronts, transit hubs, and populated commercial areas.\n"
-        f"• 🚨 Report any suspicious activity or unsafe conditions to local authorities and the SafeWalk community."
+        f"• Route Safety Score for {city_safe}: {avg_score}/100 at {time_str}.\n"
+        f"• Stick to well-lit main arterial roads and avoid unlit alleyways or shortcuts.\n"
+        f"• Keep your mobile phone charged, GPS active, and emergency SOS contacts accessible.\n"
+        f"• Walk confidently near active storefronts, transit hubs, and populated commercial areas.\n"
+        f"• Report any suspicious activity or unsafe conditions to local authorities and the SafeWalk community."
     )
 
 

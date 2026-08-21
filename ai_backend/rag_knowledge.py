@@ -78,28 +78,28 @@ Provide a clear, 3-point actionable answer (under 120 words). Be empathetic, pra
     # 3. Dynamic Rule-Based Smart Fallback Engine
     if "follow" in q_clean or "behind" in q_clean or "stalk" in q_clean:
         guidance = (
-            f"💡 **Immediate Safety Steps for {city_safe}:**\n\n"
+            f"**Immediate Safety Steps for {city_safe}:**\n\n"
             f"1. **Cross the Street:** Immediately change your walking pace or cross to the opposite side to confirm if you are being followed.\n"
             f"2. **Enter a Safe Space:** Step into an open store, 24/7 petrol pump, hotel lobby, or transit hub. Do NOT go directly to your home.\n"
             f"3. **Alert Help:** Call emergency helpline (112) or trigger the SafeWalk Emergency SOS SMS alert to your trusted contacts."
         )
     elif "cab" in q_clean or "taxi" in q_clean or "auto" in q_clean or "uber" in q_clean:
         guidance = (
-            f"💡 **Rideshare & Cab Safety Protocol in {city_safe}:**\n\n"
+            f"**Rideshare & Cab Safety Protocol in {city_safe}:**\n\n"
             f"1. **Verify Credentials:** Check the license plate number, driver photo, and vehicle model before opening the door.\n"
             f"2. **Share Live Trip:** Send your live ride tracking link to family/friends and ensure child lock is disabled.\n"
             f"3. **Stay Alert:** Keep your phone in hand and follow the route on your own map."
         )
     elif "night" in q_clean or "dark" in q_clean or "late" in q_clean:
         guidance = (
-            f"💡 **Late Night Pedestrian Safety for {city_safe}:**\n\n"
+            f"**Late Night Pedestrian Safety for {city_safe}:**\n\n"
             f"1. **Main Arterial Roads:** Stick strictly to illuminated main avenues; avoid unlit shortcuts or alleyways.\n"
             f"2. **Visible Confidence:** Walk briskly with head up, ears free from heavy headphones, and phone fully charged.\n"
             f"3. **Community Nodes:** Stay close to well-lit commercial storefronts, metro station exits, and police booths."
         )
     else:
         guidance = (
-            f"💡 **General Safety Guidance for {city_safe}:**\n\n"
+            f"**General Safety Guidance for {city_safe}:**\n\n"
             f"1. **Stay Aware:** Keep spatial awareness high, phone charged, and emergency contacts on quick dial.\n"
             f"2. **Use Safe Routes:** Follow SafeWalk's green verified safe walking paths with high streetlight and POI density.\n"
             f"3. **Report Incidents:** Share crowdsourced updates on the Live Feed to help protect fellow women in your community."
