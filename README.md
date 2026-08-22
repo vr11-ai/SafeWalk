@@ -187,7 +187,36 @@ SafeWalk v2.0 was designed and developed by **Team SafeWalk** (UPES Dehradun, 20
 
 ---
 
-## 📜 7. License & Credits
+
+---
+
+## 🚀 7. Future Roadmap & Strategic Vision
+
+As SafeWalk expands beyond hackathons into a global safety infrastructure, our roadmap focuses on technical upgrades, UX enhancements, and deep hardware integrations:
+
+### 🎨 1. Dedicated HTML5 / CSS3 / JavaScript Web Application
+- **Custom Web Stack Migration**: Transitioning from Streamlit to a lightweight, hyper-responsive SPA (Single Page Application) built with pure HTML5, CSS3 glassmorphism, and Vanilla JavaScript.
+- **REST / WebSocket Backend API**: Exposing Flask / FastAPI microservices for instant client-side route rendering, animated Leaflet/Mapbox maps, and low-latency live incident updates.
+- **Mobile PWA Support**: Progressive Web App capability allowing women to install SafeWalk directly on iOS/Android home screens with zero app store friction.
+
+### ⌚ 2. IoT Smartwatch & Wearable Panic Integration
+- **Haptic Emergency Alert**: One-touch panic trigger on Apple Watch / WearOS that sends instant background SOS location broadcasts to emergency contacts and nearby verified users.
+- **Heart Rate & Fall Detection**: Autonomous anomaly detection using biometric telemetry to detect sudden stress spikes or physical confrontations.
+
+### 🔊 3. Real-Time Voice Navigation & Offline Maps
+- **Turn-by-Turn Audio Guidance**: Voice guidance informing the user of well-lit street turns, nearby open commercial shops, and high-safety zones.
+- **Zero-Connectivity Emergency Maps**: Vector tile caching and compressed spatial grid SQLite storage for offline navigation in areas with weak cellular reception.
+
+### 🏪 4. Verified Safe Haven Business Partner Network
+- **24/7 Verified Safe Hubs**: Partnering with verified local pharmacies, 24/7 convenience stores, petrol stations, and police booths as designated emergency walk-in shelters.
+- **Interactive Safe Node Markers**: Displaying verified open safe havens dynamically along walking routes.
+
+### 🔒 5. Privacy-Preserving On-Device AI
+- **Federated Anomaly Detection**: Local on-device NLP parsing and spatial analytics ensuring sensitive user location traces remain private and encrypted.
+
+---
+
+## 📜 8. License & Credits
 
 Built with ❤️ by **Team SafeWalk** (UPES Dehradun, 2026).  
 Powered by **Google Gemini AI**, **OpenStreetMap**, **OSRM**, **ReportLab**, and **Streamlit**.
