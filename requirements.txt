@@ -1,7 +1,6 @@
-flask
-flask-cors
-gunicorn
 requests
 google-generativeai
 python-dotenv
-numpy
+streamlit
+folium
+streamlit-folium
