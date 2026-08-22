@@ -105,7 +105,7 @@ SafeWalk/
 
 ---
 
-## ⚡ 4. Setup & Running Guide
+## ⚡ 4. Setup & Deployment Guide
 
 ### 1️⃣ Installation & Environment Setup
 Clone the repository and install the dependencies:
@@ -125,7 +125,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 ### 2️⃣ Running the Streamlit Web Application
 
-Launch the Streamlit web interface:
+Launch the Streamlit web interface locally:
 
 ```bash
 streamlit run frontend/app.py
@@ -133,7 +133,22 @@ streamlit run frontend/app.py
 
 ---
 
-### 3️⃣ Running the Interactive Terminal Application (CLI)
+### 3️⃣ Streamlit Community Cloud Deployment (100% Free)
+
+SafeWalk is pre-configured for instant 1-click deployment on **Streamlit Community Cloud**:
+
+1. Go to **[share.streamlit.io](https://share.streamlit.io)** and log in with your GitHub account.
+2. Click **New app** → Select repository `vr11-ai/SafeWalk` (branch `main`).
+3. Set **Main file path** to `frontend/app.py`.
+4. Under **Advanced settings...** → **Secrets**, add:
+   ```toml
+   GEMINI_API_KEY = "your_actual_gemini_api_key_here"
+   ```
+5. Click **Deploy!**
+
+---
+
+### 4️⃣ Running the Interactive Terminal Application (CLI)
 
 To test all SafeWalk features interactively in your terminal:
 
@@ -143,7 +158,7 @@ python backend/cli_demo.py
 
 ---
 
-### 4️⃣ Running Test Suites
+### 5️⃣ Running Test Suites
 
 #### Run Backend Unit Tests:
 ```bash
@@ -174,7 +189,16 @@ python backend/test_integration.py
 
 ---
 
-## 👥 6. Team Credits & Roles
+## 🚀 6. Future Roadmap & Strategic Vision
+
+- **Dedicated HTML5 / CSS3 / JavaScript Custom Frontend**: Future migration to a standalone custom web stack SPA with interactive Leaflet map rendering and mobile PWA support.
+- **IoT Smartwatch & Wearable Panic Integration**: One-touch panic trigger on Apple Watch / WearOS for instant emergency location broadcasts.
+- **Real-Time Voice Navigation**: Spoken turn-by-turn guidance focusing on well-lit main arterial roads and nearby commercial nodes.
+- **24/7 Verified Safe Haven Partner Network**: Partnering with verified pharmacies, 24/7 convenience stores, and police booths as designated emergency walk-in shelters.
+
+---
+
+## 👥 7. Team Credits & Roles
 
 SafeWalk v2.0 was designed and developed by **Team SafeWalk** (UPES Dehradun, 2026):
 
@@ -184,35 +208,6 @@ SafeWalk v2.0 was designed and developed by **Team SafeWalk** (UPES Dehradun, 20
   *Streamlit Dashboard UI/UX, Folium Map Component Architecture, Live Incident Feed Components, and SOS Interface.*
 - **Ritika** — **Backend Foundation Lead**  
   *SQLite Database Schema Architecture, Initial OSRM & Overpass API Routing Foundation, and Core Safety Scoring Base.*
-
----
-
-
----
-
-## 🚀 7. Future Roadmap & Strategic Vision
-
-As SafeWalk expands beyond hackathons into a global safety infrastructure, our roadmap focuses on technical upgrades, UX enhancements, and deep hardware integrations:
-
-### 🎨 1. Dedicated HTML5 / CSS3 / JavaScript Web Application
-- **Custom Web Stack Migration**: Transitioning from Streamlit to a lightweight, hyper-responsive SPA (Single Page Application) built with pure HTML5, CSS3 glassmorphism, and Vanilla JavaScript.
-- **REST / WebSocket Backend API**: Exposing Flask / FastAPI microservices for instant client-side route rendering, animated Leaflet/Mapbox maps, and low-latency live incident updates.
-- **Mobile PWA Support**: Progressive Web App capability allowing women to install SafeWalk directly on iOS/Android home screens with zero app store friction.
-
-### ⌚ 2. IoT Smartwatch & Wearable Panic Integration
-- **Haptic Emergency Alert**: One-touch panic trigger on Apple Watch / WearOS that sends instant background SOS location broadcasts to emergency contacts and nearby verified users.
-- **Heart Rate & Fall Detection**: Autonomous anomaly detection using biometric telemetry to detect sudden stress spikes or physical confrontations.
-
-### 🔊 3. Real-Time Voice Navigation & Offline Maps
-- **Turn-by-Turn Audio Guidance**: Voice guidance informing the user of well-lit street turns, nearby open commercial shops, and high-safety zones.
-- **Zero-Connectivity Emergency Maps**: Vector tile caching and compressed spatial grid SQLite storage for offline navigation in areas with weak cellular reception.
-
-### 🏪 4. Verified Safe Haven Business Partner Network
-- **24/7 Verified Safe Hubs**: Partnering with verified local pharmacies, 24/7 convenience stores, petrol stations, and police booths as designated emergency walk-in shelters.
-- **Interactive Safe Node Markers**: Displaying verified open safe havens dynamically along walking routes.
-
-### 🔒 5. Privacy-Preserving On-Device AI
-- **Federated Anomaly Detection**: Local on-device NLP parsing and spatial analytics ensuring sensitive user location traces remain private and encrypted.
 
 ---
 
