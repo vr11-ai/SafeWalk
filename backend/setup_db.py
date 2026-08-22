@@ -1,9 +1,10 @@
+import os
 # setup_db.py — MEMBER 2 OWNS THIS FILE
 import sqlite3
 from datetime import datetime, timedelta
 
 def init_database():
-    conn = sqlite3.connect('safewalk.db')
+    conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'safewalk.db'))
     conn.execute('''
     CREATE TABLE IF NOT EXISTS incidents (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +40,7 @@ def init_database():
 
 def save_incident(lat, lng, inc_type, severity,
                   time_of_day, city, country, description=''):
-    conn = sqlite3.connect('safewalk.db')
+    conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'safewalk.db'))
     conn.execute('''
     INSERT INTO incidents
     (lat,lng,type,severity,time_of_day,city,country,description,weight)
@@ -50,7 +51,7 @@ def save_incident(lat, lng, inc_type, severity,
 
 def seed_demo_data():
     """Seeds at least 15 realistic Delhi incidents if table is empty or has fewer than 15 rows."""
-    conn = sqlite3.connect('safewalk.db')
+    conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'safewalk.db'))
     count = conn.execute('SELECT COUNT(*) FROM incidents').fetchone()[0]
     if count >= 15:
         conn.close()

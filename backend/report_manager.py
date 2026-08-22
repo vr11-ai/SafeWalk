@@ -1,9 +1,11 @@
+import os
 # report_manager.py - Real-Time Dynamic Weight Engine (Security Hardened DB Contexts)
 import sqlite3
 import math
 from datetime import datetime
 
-DB_PATH = "safewalk.db"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "safewalk.db")
 
 
 def calculate_weight(hours_ago: float, upvotes: int = 0, downvotes: int = 0) -> float:
